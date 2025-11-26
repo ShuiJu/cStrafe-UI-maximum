@@ -17,7 +17,7 @@ HTML_TEMPLATE = """
         <title>cStrafe HUD</title>
         <style>
             body { 
-                background-color: rgba(0, 0, 0, 0); 
+                background-color: #000000; /* 改为纯黑色背景 */
                 margin: 0; 
                 overflow: hidden; 
                 font-family: 'Courier New', monospace;
@@ -27,10 +27,15 @@ HTML_TEMPLATE = """
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
-                padding: 10px;
+                padding: 15px; /* 增加内边距 */
                 text-shadow: 2px 2px 0px #000000;
+                background-color: #000000; /* 容器也设为黑色 */
             }
-            .line { font-size: 24px; white-space: pre; }
+            .line { 
+                font-size: 144px; /* 字号放大 */
+                white-space: pre; 
+                line-height: 1.2; /* 增加行高 */
+            }
             .hidden { display: none; }
         </style>
     </head>
