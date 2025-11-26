@@ -90,12 +90,19 @@ class MovementClassifier:
         if (shot_time - self.last_transition_time) < 500:
             shot_delay = shot_time - self.last_transition_time
             
-            if self.last_transition_type == "Overlap":
-                # Overlap: Green
-                return ShotResult("Overlap", "#228b22", self.last_transition_diff, shot_delay)
-            elif self.last_transition_type == "EarlyRelease":
-                # Early Release: Orange
-                return ShotResult("EarlyRelease", "#ff8c00", self.last_transition_diff, shot_delay)
+            # 计算时间间隔的绝对值（无论重叠还是间隔）
+            time_diff_abs = abs(self.last_transition_diff)
+            
+            # 根据时间间隔决定颜色
+            if time_diff_abs <= 20:
+                # 完美急停：绿色 (#228b22)
+                color = "#228b22"
+            else:
+                # 时间间隔过大：橙色 (#ff8c00)
+                color = "#ff8c00"
+            
+            return ShotResult(self.last_transition_type, color, self.last_transition_diff, shot_delay)
+
         
         # 3. 既没按键，也不是刚急停，可能是静止射击或太久之前的操作
         # 这里归类为 "Static" 或者显示上次的数据但标灰，为了UI简洁，暂视为一种“无操作”或显示 Clean
