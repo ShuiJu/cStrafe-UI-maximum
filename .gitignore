@@ -1,0 +1,4 @@
+*.exe
+/main.dist
+/images
+/dist
