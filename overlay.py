@@ -1,111 +1,72 @@
+# overlay.py
 import tkinter as tk
 from typing import Optional
-
-from classifier import ShotClassification
-
+from classifier import ShotResult
 
 class Overlay:
     def __init__(self) -> None:
         self.root = tk.Tk()
-        self.root.title("cStrafe UI by CS2Kitchen")
+        self.root.title("cStrafe Local")
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
-        self.frame = tk.Frame(self.root, bd=2, relief="solid")
+        self.root.attributes("-alpha", 0.85) #稍微透明一点
+        
+        self.frame = tk.Frame(self.root, bg="#202020", bd=0)
         self.frame.pack(fill=tk.BOTH, expand=True)
-        self.header_font_size = 12
-        self.body_font_size = 10
-        self.retro_font = "Courier"
-        self.header = tk.Label(
+        
+        self.font_name = "Courier New"
+        self.font_size = 14
+        self.font_weight = "bold"
+
+        # 主显示标签 (多行)
+        self.label = tk.Label(
             self.frame,
-            text="cStrafe UI",
-            fg="white",
-            bg="#303030",
-            font=(self.retro_font, self.header_font_size, "bold"),
-            anchor="center",
-        )
-        self.header.pack(fill=tk.X)
-        self.body = tk.Label(
-            self.frame,
-            text="Waiting for input...",
+            text="Waiting...",
             fg="white",
             bg="#202020",
-            font=(self.retro_font, self.body_font_size),
-            justify=tk.CENTER,
-            anchor="center",
+            font=(self.font_name, self.font_size, self.font_weight),
+            justify=tk.LEFT,
+            padx=10,
+            pady=5
         )
-        self.body.pack(fill=tk.BOTH, expand=True, padx=8, pady=4)
-        self._offset_x: Optional[int] = None
-        self._offset_y: Optional[int] = None
-        self.header.bind("<ButtonPress-1>", self._on_mouse_down)
-        self.header.bind("<B1-Motion>", self._on_mouse_move)
-        self.is_visible = True
-        self._last_text: Optional[str] = None
-        self._last_bg_colour: Optional[str] = None
+        self.label.pack()
 
-    def _on_mouse_down(self, event: tk.Event) -> None:
-        self._offset_x = event.x
-        self._offset_y = event.y
+        # 拖动逻辑
+        self.root.bind("<ButtonPress-1>", self._on_drag_start)
+        self.root.bind("<B1-Motion>", self._on_drag_move)
+        self._drag_data = {"x": 0, "y": 0}
 
-    def _on_mouse_move(self, event: tk.Event) -> None:
-        if self._offset_x is not None and self._offset_y is not None:
-            x = event.x_root - self._offset_x
-            y = event.y_root - self._offset_y
-            self.root.geometry(f"+{x}+{y}")
+    def _on_drag_start(self, event):
+        self._drag_data["x"] = event.x
+        self._drag_data["y"] = event.y
 
-    def update_result(self, classification: ShotClassification) -> None:
-        label = classification.label
-        lines = [f"Classification: {label}"]
-        if label == "Counter‑strafe" and classification.cs_time is not None and classification.shot_delay is not None:
-            lines.append(f"CS time: {classification.cs_time:.0f} ms")
-            lines.append(f"Shot delay: {classification.shot_delay:.0f} ms")
-        elif label == "Overlap" and classification.overlap_time is not None:
-            lines.append(f"Overlap: {classification.overlap_time:.0f} ms")
-        elif label == "Bad" and classification.cs_time is not None and classification.shot_delay is not None:
-            lines.append(f"CS time: {classification.cs_time:.0f} ms")
-            lines.append(f"Shot delay: {classification.shot_delay:.0f} ms")
-        colours = {
-            "Counter‑strafe": "#228b22",
-            "Overlap": "#ff8c00",
-            "Bad": "#cc0000",
-        }
-        bg_colour = colours.get(label, "#202020")
-        text = "\n".join(lines)
-        if text == self._last_text and bg_colour == self._last_bg_colour:
-            return
-        self._last_text = text
-        self._last_bg_colour = bg_colour
-        def apply_update() -> None:
-            self.frame.configure(bg=bg_colour)
-            self.body.configure(text=text, bg=bg_colour)
-        self.root.after(0, apply_update)
+    def _on_drag_move(self, event):
+        x = self.root.winfo_x() - self._drag_data["x"] + event.x
+        y = self.root.winfo_y() - self._drag_data["y"] + event.y
+        self.root.geometry(f"+{x}+{y}")
+
+    def update_result(self, result: ShotResult) -> None:
+        lines = []
+        if result.state_type == "Run&Gun":
+            lines.append("RUN & GUN")
+        elif result.state_type == "Static":
+            lines.append("STATIC / IDLE")
+        else:
+            # Overlap 或 EarlyRelease
+            type_text = "Overlap" if result.state_type == "Overlap" else "Gap"
+            lines.append(f"{type_text: <10} {int(result.time_diff)} ms")
+            lines.append(f"{'Shot Delay': <10} {int(result.shot_delay)} ms")
+
+        final_text = "\n".join(lines)
+        
+        # 更新颜色和文本
+        self.root.after(0, lambda: self._apply_ui(final_text, result.color_hex))
+
+    def _apply_ui(self, text, color):
+        self.label.config(text=text, fg=color)
+        # 边框颜色也可以跟着变，如果想更明显
+        self.frame.config(bg="#202020") 
 
     def run(self) -> None:
         self.root.mainloop()
 
-    def _apply_font_sizes(self) -> None:
-        self.header.configure(font=(self.retro_font, self.header_font_size, "bold"))
-        self.body.configure(font=(self.retro_font, self.body_font_size))
-
-    def increase_size(self) -> None:
-        if self.body_font_size < 24:
-            self.body_font_size += 2
-            self.header_font_size += 2
-            self._apply_font_sizes()
-
-    def decrease_size(self) -> None:
-        if self.body_font_size > 8:
-            self.body_font_size -= 2
-            self.header_font_size = max(10, self.header_font_size - 2)
-            self._apply_font_sizes()
-
-    def toggle_visibility(self) -> None:
-        def do_toggle() -> None:
-            if self.is_visible:
-                self.root.withdraw()
-            else:
-                self.root.deiconify()
-            self.is_visible = not self.is_visible
-        self.root.after(0, do_toggle)
-
-    def terminate(self) -> None:
-        self.root.after(0, self.root.destroy)
