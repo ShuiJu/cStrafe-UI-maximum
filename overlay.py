@@ -49,6 +49,10 @@ class Overlay:
         lines = []
         if result.state_type == "Run&Gun":
             lines.append("RUN & GUN")
+            # 如果有急停数据，显示时间差和射击延迟
+            if result.time_diff is not None and result.shot_delay is not None:
+                lines.append(f"{'Stop Diff': <10} {int(result.time_diff)} ms")
+                lines.append(f"{'Shot Delay': <10} {int(result.shot_delay)} ms")
         elif result.state_type == "Static":
             lines.append("STATIC / IDLE")
         else:
@@ -69,4 +73,3 @@ class Overlay:
 
     def run(self) -> None:
         self.root.mainloop()
-
