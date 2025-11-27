@@ -32,7 +32,7 @@ HTML_TEMPLATE = """
                 background-color: #000000; /* 容器也设为黑色 */
             }
             .line { 
-                font-size: 144px; /* 字号放大 */
+                font-size: 40px; /* 字号放大 */
                 white-space: pre; 
                 line-height: 1.2; /* 增加行高 */
             }
