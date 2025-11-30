@@ -81,30 +81,28 @@ class MovementClassifier:
                     self.last_transition_time = timestamp # 以松开的时间为“完成急停”的时间点
 
     def classify_shot(self, shot_time: float) -> ShotResult:
-        # 1. 跑打检测 (Run & Gun) - 优先级最高
-        # 只要水平方向有键被按着，就是跑打 (W/S 暂时忽略，CS2中 A/D 影响最大)
-        if self.keys["A"].is_held or self.keys["D"].is_held:
-            return ShotResult("Run&Gun", "#ff4444") # 红色
+        is_run_gun = self.keys["A"].is_held or self.keys["D"].is_held
+        has_recent_stop = (shot_time - self.last_transition_time) < 500
 
-        # 2. 检查是否刚刚发生了急停操作 (500ms 内)
-        if (shot_time - self.last_transition_time) < 500:
-            shot_delay = shot_time - self.last_transition_time
-            
-            # 计算时间间隔的绝对值（无论重叠还是间隔）
-            time_diff_abs = abs(self.last_transition_diff)
-            
-            # 根据时间间隔决定颜色
-            if time_diff_abs <= 20:
-                # 完美急停：绿色 (#228b22)
-                color = "#228b22"
+        if is_run_gun:
+            # 跑打状态
+            if has_recent_stop:
+                # 有近期急停，显示急停数据
+                shot_delay = shot_time - self.last_transition_time
+                return ShotResult("Run&Gun", "#ff4444", self.last_transition_diff, shot_delay)
             else:
-                # 时间间隔过大：橙色 (#ff8c00)
-                color = "#ff8c00"
-            
-            return ShotResult(self.last_transition_type, color, self.last_transition_diff, shot_delay)
-
-        
-        # 3. 既没按键，也不是刚急停，可能是静止射击或太久之前的操作
-        # 这里归类为 "Static" 或者显示上次的数据但标灰，为了UI简洁，暂视为一种“无操作”或显示 Clean
-        return ShotResult("Static", "#888888", 0, 0)
-
+                # 没有近期急停，只显示跑打
+                return ShotResult("Run&Gun", "#ff4444")
+        else:
+            # 非跑打状态
+            if has_recent_stop:
+                shot_delay = shot_time - self.last_transition_time
+                time_diff_abs = abs(self.last_transition_diff)
+                if time_diff_abs <= 20:
+                    color = "#228b22"  # 绿色
+                else:
+                    color = "#ff8c00"  # 橙色
+                return ShotResult(self.last_transition_type, color, self.last_transition_diff, shot_delay)
+            else:
+                # 静态射击
+                return ShotResult("Static", "#888888")

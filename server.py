@@ -9,7 +9,7 @@ from classifier import ShotResult
 
 app = FastAPI()
 
-# 确保 HTML 模板正确定义（放在文件顶部）
+# 修改 HTML 模板，确保跑打状态显示急停数据
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -17,7 +17,7 @@ HTML_TEMPLATE = """
         <title>cStrafe HUD</title>
         <style>
             body { 
-                background-color: #000000; /* 改为纯黑色背景 */
+                background-color: #000000;
                 margin: 0; 
                 overflow: hidden; 
                 font-family: 'Courier New', monospace;
@@ -27,14 +27,14 @@ HTML_TEMPLATE = """
                 display: flex;
                 flex-direction: column;
                 align-items: flex-start;
-                padding: 15px; /* 增加内边距 */
+                padding: 15px;
                 text-shadow: 2px 2px 0px #000000;
-                background-color: #000000; /* 容器也设为黑色 */
+                background-color: #000000;
             }
             .line { 
-                font-size: 40px; /* 字号放大 */
+                font-size: 40px;
                 white-space: pre; 
-                line-height: 1.2; /* 增加行高 */
+                line-height: 1.2;
             }
             .hidden { display: none; }
         </style>
@@ -43,29 +43,44 @@ HTML_TEMPLATE = """
         <div id="container">
             <div id="line1" class="line" style="color: white;">Waiting...</div>
             <div id="line2" class="line" style="color: white;"></div>
+            <div id="line3" class="line" style="color: white;"></div>
         </div>
         <script>
             var ws = new WebSocket("ws://" + location.host + "/ws");
             var container = document.getElementById("container");
             var l1 = document.getElementById("line1");
             var l2 = document.getElementById("line2");
+            var l3 = document.getElementById("line3");
 
             ws.onmessage = function(event) {
                 var data = JSON.parse(event.data);
                 
+                // 设置所有行的颜色
                 l1.style.color = data.color;
                 l2.style.color = data.color;
+                l3.style.color = data.color;
 
                 if (data.type === "Run&Gun") {
                     l1.innerText = "RUN & GUN";
-                    l2.innerText = "";
+                    if (data.diff !== null && data.delay !== null) {
+                        // 显示急停数据：时间差和射击延迟
+                        l2.innerText = "Stop Diff    " + data.diff + " ms";
+                        l3.innerText = "Shot Delay   " + data.delay + " ms";
+                    } else {
+                        // 没有急停数据，清空第二行和第三行
+                        l2.innerText = "";
+                        l3.innerText = "";
+                    }
                 } else if (data.type === "Static") {
                     l1.innerText = "STATIC";
                     l2.innerText = "";
+                    l3.innerText = "";
                 } else {
+                    // Overlap 或 EarlyRelease
                     var label = (data.type === "Overlap") ? "Overlap" : "Gap";
-                    l1.innerText = label + " - " + data.diff + " ms";
-                    l2.innerText = "Shot Delay - " + data.delay + " ms";
+                    l1.innerText = label + "    " + data.diff + " ms";
+                    l2.innerText = "Shot Delay   " + data.delay + " ms";
+                    l3.innerText = ""; // 第三行留空
                 }
             };
             
@@ -112,6 +127,8 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 def broadcast_shot(result: ShotResult):
+    # 添加调试输出，便于检查数据
+    # print(f"Debug: Broadcasting shot result - {result.to_display_data()}")
     if manager:
         asyncio.run_coroutine_threadsafe(
             manager.broadcast(result.to_display_data()), 

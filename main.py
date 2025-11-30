@@ -12,7 +12,7 @@ try:
     import pystray
     from PIL import Image, ImageDraw
 except ImportError:
-    print("警告: 未安装 pystray 或 Pillow，托盘图标功能不可用。")
+    # print("警告: 未安装 pystray 或 Pillow，托盘图标功能不可用。")
     pystray = None
     Image = None
 
@@ -26,7 +26,7 @@ def resource_path(relative_path):
         base_path = os.path.dirname(os.path.abspath(__file__))
     
     path = os.path.join(base_path, relative_path)
-    print(f"尝试加载资源: {path}")  # 调试信息
+    # print(f"尝试加载资源: {path}")  # 调试信息
     return path
 
 def create_default_icon():
@@ -45,12 +45,12 @@ def create_tray_icon():
     try:
         if os.path.exists(icon_path):
             image = Image.open(icon_path)
-            print(f"成功加载图标: {icon_path}")
+            # print(f"成功加载图标: {icon_path}")
         else:
-            print(f"图标文件不存在: {icon_path}，使用默认图标")
+            # print(f"图标文件不存在: {icon_path}，使用默认图标")
             image = create_default_icon()
     except Exception as e:
-        print(f"加载图标失败: {e}，使用默认图标")
+        # print(f"加载图标失败: {e}，使用默认图标")
         image = create_default_icon()
     
     menu = pystray.Menu(pystray.MenuItem("退出", lambda icon, item: os.kill(os.getpid(), signal.SIGINT)))
