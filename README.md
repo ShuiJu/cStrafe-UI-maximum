@@ -1,44 +1,37 @@
-# cStrafe UI by CS2Kitchen
+　　# cStrafe UI by CS2Kitchen
 
-This is the second project in this domain. I made this so it could be more simplified and not too confusing like the previous version.This is a lightweight training tool to help players practice  counterstrafing mechanics in CS2. It listens to your movement keys (W, A, S and D) and the left mouse button to decide whether you fired while coming to a full stop, started moving the other way or were still overlapping directions.
+　　This is the second project in this domain. The goal is to provide a simplified, lightweight training tool to help players practice counter-strafing mechanics in CS2. It listens to your movement keys (W, A, S, D) and mouse clicks to classify your shooting behavior into states such as Run & Gun, Overlap, Early Release, or Static.  
+　　Two modes are supported: **Local Overlay Mode** and **Server Mode** (for OBS).
 
-![UI Preview](images/strafe_ui_2.gif)
+　　![UI Preview](images/strafe_ui_2.gif)
 
+　　---
 
-## Installation
+　　## Features
 
-1. Make sure you have a recent Python installed. ( Install 3.13 from microsoft store if you get into issues)
-2. Install the required dependency:
+　　- Real-time classification of CS2 movement + shooting behaviors.
+　　- Two operation modes:
+　　- **Local Mode**: Transparent overlay (Tkinter-based).
+　　- **Server Mode**: Web HUD for OBS (FastAPI-based).
+　　- Customizable overlay appearance and position.
+　　- Compilable into standalone `.exe` files via Nuitka.
+　　- Supports tray icon for quick exit (Local Mode).
 
-   ```bash
-   pip install pynput tkinter
-   ```
+　　---
 
-   The Tkinter library (`tkinter`) is included with most standard Python installations on Windows and macOS.
+　　## Installation
 
-3. Download or clone this repository, then run the program from the project directory:
+　　### Prerequisites
 
-   ```bash
-   python main.py
-   ```
+　　- **Python 3.7+**  
+　　If you encounter issues, try Python 3.13 from the Microsoft Store.
+　　- Python packages:
+　　- `pynput`
+　　- `tkinter` (bundled with most Python installations)
+　　- `fastapi`, `uvicorn`, `websockets` (for Server Mode)
+　　- `pystray`, `Pillow` (for system tray support)
 
-## Usage
+　　### Install dependencies
 
-When the application is running, an overlay appears on top of your game window. It updates whenever you fire the left mouse button. You can drag it to any part of screen. Make sure to run your game in fullscreen windowed(won't work in fullscreen). You can control the overlay with a few simple keys:
-
-- **F6** – hide or show the overlay without quitting.
-- **F8** – exit the program.
-- **=** – increase the size of the overlay text.
-- **-** – decrease the size of the overlay text.
-
-## Classification Labels
-
-After each shot the tool displays one of three labels along with timing information (when applicable):
-
-| Label            | Description |
-|------------------|-------------|
-| **Counter‑strafe** | You released one movement key and quickly pressed the opposite key before shooting. A valid counterstrafe should be followed by a shot within a short delay. The overlay shows the time between the key release and the opposite key press (*CS time*) and the delay between pressing the opposite key and firing (*Shot delay*). |
-| **Overlap** | Both opposing movement keys were held at the same time. This indicates overlapping movement, which should be avoided for accurate shooting. The overlay shows how long the keys overlapped before the shot. |
-| **Bad** | No valid counterstrafe pattern was detected before the shot. This can mean you shot without changing direction, your movement timing was too slow or you were moving in only one direction. |
-
-Keep your movements crisp and have fun hope this helps you :D
+　　```bash
+　　pip install pynput fastapi uvicorn websockets pystray Pillow
