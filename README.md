@@ -1,9 +1,11 @@
 # cStrafe UI modified by ShuiJu, originally from CS2Kitchen
 
 This is a lightweight training tool to help players practice counterstrafing mechanics in CS2. It listens to your movement keys (A/D for counter strafe detection, WASD for run & gun detection) and the left mouse button to classify your shooting behavior into states like Run & Gun, Overlap, Early Release, or Static. The tool supports two modes: **Local Overlay** (a transparent GUI overlay) and **Server Mode** (a web-based HUD for OBS and/or browser on phone).
+Local:
 
 ![UI Preview](images/strafe_ui_1.avif)
 
+OBS:
 ![UI Preview](images/strafe_ui_2.avif)
 
 
