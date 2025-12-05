@@ -23,7 +23,7 @@ This is a lightweight training tool to help players practice counterstrafing mec
 
 ### Prerequisites
 
-- Python 3.7 or higher (if you encounter issues, try Python 3.13 from the Microsoft Store).
+- Python 3.7 or higher (if you encounter issues, try Python 3.11).
 - Required Python packages:
   - `pynput` (for input listening)
   - `tkinter` (usually included with Python, for Local Mode GUI)
