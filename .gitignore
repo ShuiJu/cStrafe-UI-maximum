@@ -1,3 +1,7 @@
 *.exe
 /main.dist
 /dist
+/build
+/__pycache__
+/build_server
+/main_server.dist

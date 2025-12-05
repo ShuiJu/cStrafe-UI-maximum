@@ -1,4 +1,6 @@
 # input_events.py
+import ctypes
+import ctypes.wintypes  # 显式导入
 import threading
 import time
 from typing import Optional, Callable
